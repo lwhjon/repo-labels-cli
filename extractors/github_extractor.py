@@ -91,6 +91,12 @@ class GitHubExtractor(BaseExtractor):
             return custom_json_list_labels
 
     def execute(self):
+        """
+        This is the main function which will be executed to run the GitHub extractor.
+        It returns the list of labels with customised properties compatible with this command line interface.
+        :return: It returns the list of labels with customised properties compatible with this command line interface
+        """
+
         # Workaround for known issue involving event loop for Windows environment:
         # Resources:
         # https://github.com/aio-libs/aiohttp/issues/4536#issuecomment-698441077
@@ -102,6 +108,4 @@ class GitHubExtractor(BaseExtractor):
         logger.debug(json.dumps(custom_json_list_labels))
         logger.debug(len(custom_json_list_labels))
 
-        # To export the json file and prettify it.
-        with open('exported.json', mode='w') as json_file:
-            json.dump(custom_json_list_labels, json_file, indent=4)
+        return custom_json_list_labels

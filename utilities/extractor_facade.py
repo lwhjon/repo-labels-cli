@@ -26,8 +26,9 @@ class ExtractorFacade:
                 hostname = parsed_url.netloc
 
             if "github.com" in hostname:
-                GitHubExtractor(repo_link).execute()
+                return GitHubExtractor(repo_link).execute()
             else:
                 raise SiteNotSupported(hostname)
         except SiteNotSupported as error:
             logger.error(error.message)
+        return None

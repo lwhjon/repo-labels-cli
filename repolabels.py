@@ -3,6 +3,7 @@ This module contains the main command line interface.
 """
 
 import argparse
+import json
 import sys
 import logging
 
@@ -26,7 +27,7 @@ def main():
     parser_export = subparsers.add_parser('export',
                                           help="Exports labels from the repository in a compatible format "
                                                "as a json file.")
-    parser_export.add_argument('export_repo_link', help="Link to the repository in which the labels are exported from.")
+    parser_export.add_argument('export_cmd_repo_link', help="Link to the repository in which the labels are exported from.")
 
     # Parser for "website" subcommand
     parser_website = subparsers.add_parser('website', help=f'Redirects to the {SOFTWARE_NAME} project website')
@@ -43,8 +44,14 @@ def main():
     if len(sys.argv) == 1:
         parser.print_help()
 
-    if hasattr(args, 'export_repo_link'):
-        run_extractor(remove_trailing_slash_to_url(args.export_repo_link))
+    # The logic for "export" subcommand
+    if hasattr(args, 'export_cmd_repo_link'):
+        file_path = 'exported.json'
+        custom_json_list_labels = run_extractor(remove_trailing_slash_to_url(args.export_cmd_repo_link))
+        # To export the json file and prettify it.
+        with open(file_path, mode='w') as json_file:
+            json.dump(custom_json_list_labels, json_file, indent=4)
+        logger.info(f'Labels from {args.export_cmd_repo_link} exported to {file_path}')
 
     logger.info("Script execution completed")
 
