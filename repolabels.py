@@ -16,7 +16,14 @@ MAIN_PROJECT_REPO_LINK = "https://github.com/JonathanLeeWH/repo-labels-cli"
 MAIN_EXPORT_DIRECTORY = Path.cwd().joinpath('exported')
 DEFAULT_EXPORT_FILE_NAME = 'exported.json'
 
-logging.basicConfig(filename='repolabels.log', filemode='w', level=logging.DEBUG)
+debug_mode = False
+
+# noinspection PyArgumentList
+# Known Pycharm issue: https://youtrack.jetbrains.com/issue/PY-39762
+logging.basicConfig(level=logging.DEBUG if debug_mode else logging.INFO,
+                    format="%(asctime)s %(name)s %(funcName)s [%(levelname)s] %(message)s"
+                    if debug_mode else "%(asctime)s [%(levelname)s] %(message)s",
+                    handlers=[logging.FileHandler('repolabels.log', mode='w'), logging.StreamHandler(sys.stdout)])
 logger = logging.getLogger(__name__)
 
 
@@ -57,7 +64,7 @@ def main():
     # The logic for "export" subcommand
     if hasattr(args, 'export_cmd_repo_link'):
         file_path = args.dest_file_path.with_suffix('.json')
-        custom_json_list_labels = run_extractor(remove_trailing_slash_to_url(args.export_cmd_repo_link))
+        custom_json_list_labels = run_extractor(remove_trailing_slash_to_url(args.export_cmd_repo_link)).execute()
         file_path.parent.mkdir(parents=True, exist_ok=True)
         # To export the json file and prettify it.
         with open(file_path, mode='w') as json_file:
