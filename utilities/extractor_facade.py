@@ -18,12 +18,12 @@ class ExtractorFacade:
     def execute(repo_link: str):
         try:
             current_repo_link = repo_link
-            parsed_url = urlparse(repo_link)
+            parsed_url = urlparse(current_repo_link)
             hostname = parsed_url.hostname
 
             # To consider the case where the url does not have a scheme such as github.com without https prepended
             if not parsed_url.scheme:
-                current_repo_link = f'https://{repo_link}'
+                current_repo_link = f'https://{current_repo_link}'
                 parsed_url = urlparse(current_repo_link)
                 hostname = parsed_url.hostname
 
