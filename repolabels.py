@@ -64,12 +64,14 @@ def main():
     # The logic for "export" subcommand
     if hasattr(args, 'export_cmd_repo_link'):
         file_path = args.dest_file_path.with_suffix('.json')
-        custom_json_list_labels = run_extractor(remove_trailing_slash_to_url(args.export_cmd_repo_link)).execute()
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-        # To export the json file and prettify it.
-        with open(file_path, mode='w') as json_file:
-            json.dump(custom_json_list_labels, json_file, indent=4)
-        logger.info(f'Labels from {args.export_cmd_repo_link} exported to {file_path}')
+        current_extractor = run_extractor(remove_trailing_slash_to_url(args.export_cmd_repo_link))
+        if current_extractor:
+            custom_json_list_labels = current_extractor.execute()
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            # To export the json file and prettify it.
+            with open(file_path, mode='w') as json_file:
+                json.dump(custom_json_list_labels, json_file, indent=4)
+            logger.info(f'Labels from {args.export_cmd_repo_link} exported to {file_path}')
 
     logger.info("Script execution completed")
 
