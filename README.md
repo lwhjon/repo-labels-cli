@@ -26,7 +26,7 @@ Please refer to the [`requirements.txt`](https://github.com/lwhjon/repo-labels-c
 3. Activate the newly created virtual environment.
    * `<name_of_virtual_env>\Scripts\activate.bat` **(Windows)**
    * `<name_of_virtual_env>/bin/activate` **(Linux/Mac)**
-4. Install the necessary Python package dependencies using the requirements.txt included by **RepoLabels**
+4. Install the necessary Python package dependencies using the [`requirements.txt`](https://github.com/lwhjon/repo-labels-cli/blob/master/requirements.txt) included by **RepoLabels**
    * `pip install -r requirements.txt` 
 5. You can now use **RepoLabels**.
    * `python repolabels.py`
