@@ -21,13 +21,7 @@ class ExtractorFacade:
             parsed_url = urlparse(current_repo_link)
             hostname = parsed_url.hostname
 
-            # To consider the case where the url does not have a scheme such as github.com without https prepended
-            if not parsed_url.scheme:
-                current_repo_link = f'https://{current_repo_link}'
-                parsed_url = urlparse(current_repo_link)
-                hostname = parsed_url.hostname
-
-            if hostname and hostname.endswith('github.com'):
+            if hostname and hostname in ['www.github.com', 'github.com']:
                 return GitHubExtractor(current_repo_link)
             else:
                 raise SiteNotSupported(hostname)
