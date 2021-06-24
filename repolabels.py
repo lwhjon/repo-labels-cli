@@ -3,22 +3,39 @@ This module contains the main command line interface.
 """
 
 import argparse
+import json
+import re
 import sys
 import logging
 
+from pathlib import Path
+from urllib.parse import urlparse
 from utilities.cli_utils import open_link, run_extractor, remove_trailing_slash_to_url
+from datetime import datetime
 
 SOFTWARE_NAME = "Repository Labels command line interface"
 VERSION = '1.0.0'
-MAIN_PROJECT_REPO_LINK = "https://github.com/JonathanLeeWH/repo-labels-cli"
+MAIN_PROJECT_REPO_LINK = "https://github.com/lwhjon/repo-labels-cli"
+MAIN_EXPORT_DIRECTORY = Path.cwd().joinpath('exported')
+# The default file name will be renamed to the format {repo_owner}_{repo_name}_{current date and time}.json
+# if the default: exported/exported.json is used.
+DEFAULT_EXPORT_FILE_NAME = 'exported.json'
 
-logging.basicConfig(filename='repolabels.log', filemode='w', level=logging.DEBUG)
+debug_mode = False
+
+# noinspection PyArgumentList
+# Known Pycharm issue: https://youtrack.jetbrains.com/issue/PY-39762
+logging.basicConfig(level=logging.DEBUG if debug_mode else logging.INFO,
+                    format="%(asctime)s %(name)s %(funcName)s [%(levelname)s] %(message)s"
+                    if debug_mode else "%(asctime)s [%(levelname)s] %(message)s",
+                    handlers=[logging.FileHandler('repolabels.log', mode='w'), logging.StreamHandler(sys.stdout)])
 logger = logging.getLogger(__name__)
 
 
 def main():
     parser = argparse.ArgumentParser(
         description=f'{SOFTWARE_NAME} is a command line interface to manage GitHub Repository labels.')
+    parser.add_argument('--version', action='version', version=f'{SOFTWARE_NAME} Version {VERSION}')
 
     subparsers = parser.add_subparsers(description="A list of possible subcommands")
 
@@ -26,7 +43,14 @@ def main():
     parser_export = subparsers.add_parser('export',
                                           help="Exports labels from the repository in a compatible format "
                                                "as a json file.")
-    parser_export.add_argument('export_repo_link', help="Link to the repository in which the labels are exported from.")
+    parser_export.add_argument('export_cmd_repo_link',
+                               help="Link to the repository in which the labels are exported from.")
+    parser_export.add_argument('-d', '--dest_file_path',
+                               default=MAIN_EXPORT_DIRECTORY.joinpath(DEFAULT_EXPORT_FILE_NAME),
+                               type=Path,
+                               help="The destination file path in which the exported labels will be exported to. "
+                                    "(default destination file path: "
+                                    "'exported/{repo_owner}_{repo_name}_{current date and time}.json')")
 
     # Parser for "website" subcommand
     parser_website = subparsers.add_parser('website', help=f'Redirects to the {SOFTWARE_NAME} project website')
@@ -43,8 +67,35 @@ def main():
     if len(sys.argv) == 1:
         parser.print_help()
 
-    if hasattr(args, 'export_repo_link'):
-        run_extractor(remove_trailing_slash_to_url(args.export_repo_link))
+    # The logic for "export" subcommand
+    if hasattr(args, 'export_cmd_repo_link'):
+        current_export_url = remove_trailing_slash_to_url(args.export_cmd_repo_link)
+        parsed_export_url = urlparse(current_export_url)
+
+        # To consider the case where the url does not have a scheme such as github.com without https prepended
+        if not parsed_export_url.scheme:
+            current_export_url = f'https://{current_export_url}'
+            parsed_export_url = urlparse(current_export_url)
+
+        _, repo_owner, repo_name = parsed_export_url.path.split('/')
+
+        file_path = args.dest_file_path.with_suffix('.json')
+
+        # If the default directory file path is used,
+        # rename the file_path to the format: 'exported/{repo_owner}_{repo_name}_{current date and time}.json'
+        if args.dest_file_path == MAIN_EXPORT_DIRECTORY.joinpath(DEFAULT_EXPORT_FILE_NAME):
+            file_path = MAIN_EXPORT_DIRECTORY.joinpath(
+                f"{repo_owner}_{repo_name}_{re.sub(r'[-.:]', '_', str(datetime.now()))}.json")
+
+        current_extractor = run_extractor(current_export_url)
+
+        if current_extractor:
+            custom_json_list_labels = current_extractor.execute()
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            # To export the json file and prettify it.
+            with open(file_path, mode='w') as json_file:
+                json.dump(custom_json_list_labels, json_file, indent=4)
+            logger.info(f'Labels from {args.export_cmd_repo_link} exported to {file_path}')
 
     logger.info("Script execution completed")
 

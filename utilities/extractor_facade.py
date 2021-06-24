@@ -17,17 +17,14 @@ class ExtractorFacade:
     @staticmethod
     def execute(repo_link: str):
         try:
-            parsed_url = urlparse(repo_link)
-            hostname = parsed_url.netloc
+            current_repo_link = repo_link
+            parsed_url = urlparse(current_repo_link)
+            hostname = parsed_url.hostname
 
-            # To consider the case where the url does not have a scheme such as github.com without https prepended
-            if not parsed_url.scheme:
-                parsed_url = urlparse(f'https://{repo_link}')
-                hostname = parsed_url.netloc
-
-            if "github.com" in hostname:
-                GitHubExtractor(repo_link).execute()
+            if hostname and hostname in ['www.github.com', 'github.com']:
+                return GitHubExtractor(current_repo_link)
             else:
                 raise SiteNotSupported(hostname)
         except SiteNotSupported as error:
             logger.error(error.message)
+        return None
