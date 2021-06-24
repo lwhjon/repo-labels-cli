@@ -89,7 +89,7 @@ def main():
             # rename the file_path to the format: 'exported/{repo_owner}_{repo_name}_{current date and time}.json'
             if args.dest_file_path == MAIN_EXPORT_DIRECTORY.joinpath(DEFAULT_EXPORT_FILE_NAME):
                 file_path = MAIN_EXPORT_DIRECTORY.joinpath(
-                    f"{repo_owner}_{repo_name}_{re.sub(r'[-.:]', '_', str(datetime.now()))}.json")
+                    f"{repo_owner}_{repo_name}_{re.sub(r'[-.: ]', '_', str(datetime.now()))}.json")
 
             custom_json_list_labels = current_extractor.execute()
             file_path.parent.mkdir(parents=True, exist_ok=True)
