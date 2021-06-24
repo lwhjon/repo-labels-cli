@@ -76,12 +76,11 @@ class GitHubExtractor(BaseExtractor):
 
     async def request_labels(self):
         api_headers = {'Accept': self.accept_header}
-        params = {'per_page': self.per_page}
         async with aiohttp.ClientSession(headers=api_headers) as session:
             num_of_pages = await self.get_num_of_pages(session)
             tasks = []
             for current_page_num in range(1, num_of_pages + 1):
-                params['page'] = current_page_num
+                params = {'per_page': self.per_page, 'page': current_page_num}
                 tasks.append(asyncio.ensure_future(self.get_labels_list(session, params)))
 
             custom_json_list_labels = await asyncio.gather(*tasks)
