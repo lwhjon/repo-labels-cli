@@ -1,5 +1,5 @@
 """
-This module contains the exceptions that are used by extractors.
+This module contains the exceptions that are commonly used.
 """
 
 

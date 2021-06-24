@@ -9,7 +9,7 @@ import sys
 import logging
 
 from pathlib import Path
-from utilities.cli_utils import open_link, run_extractor, format_url
+from utilities.cli_utils import open_link, run_extractor, format_url, run_importer
 from datetime import datetime
 
 SOFTWARE_NAME = "Repository Labels command line interface"
@@ -98,9 +98,16 @@ def main():
                 json.dump(custom_json_list_labels, json_file, indent=4)
             logger.info(f'Labels from {args.export_cmd_repo_link} exported to {file_path}')
 
-    # The logic for "import" subcommand
+    # The logic for "import" subcommand with source json file path
     if hasattr(args, 'import_cmd_repo_link') and hasattr(args, 'src_json_file_path'):
-        pass
+        current_import_url = format_url(args.import_cmd_repo_link)
+
+        current_importer = run_importer(current_import_url, src_json_file_path=args.src_json_file_path)
+
+        if current_importer:
+            current_importer.execute()
+            logger.info(
+                f'Labels from {args.src_json_file_path} has been successfully imported to {args.import_cmd_repo_link}')
 
     logger.info("Script execution completed")
 

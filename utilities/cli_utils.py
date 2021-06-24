@@ -3,9 +3,10 @@ This module contains the command line interface (cli) utility methods
 """
 
 import webbrowser
+from pathlib import Path
 from urllib.parse import urlparse
-
 from utilities.extractor_facade import ExtractorFacade
+from utilities.importer_facade import ImporterFacade
 
 
 def open_link(args):
@@ -45,4 +46,9 @@ def format_url(url):
 
 def run_extractor(export_repo_link):
     response = ExtractorFacade().execute(export_repo_link)
+    return response
+
+
+def run_importer(import_repo_link, src_json_file_path: Path = None):
+    response = ImporterFacade().execute(import_repo_link, src_json_file_path)
     return response
