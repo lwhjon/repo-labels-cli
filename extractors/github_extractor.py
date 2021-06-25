@@ -13,7 +13,7 @@ from aiohttp import BasicAuth
 from bs4 import BeautifulSoup
 from extractors.base_extractor import BaseExtractor
 from utilities.config import GITHUB_USERNAME, GITHUB_PERSONAL_ACCESS_TOKEN
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,7 @@ class GitHubExtractor(BaseExtractor):
         # Max number of pages allowed by GitHub API for list of labels in repository is 100
         # https://docs.github.com/en/rest/reference/issues#list-labels-for-a-repository
         self.per_page = 100
+        self.total_num_pages_labels = None
         self.repo_owner, self.repo_name = self.parse_github_link(link)
         self.labels_api_link = f'{self.main_api_link}/repos/{self.repo_owner}/{self.repo_name}/labels'
         self.authentication = BasicAuth(GITHUB_USERNAME, password=GITHUB_PERSONAL_ACCESS_TOKEN)
@@ -53,7 +54,14 @@ class GitHubExtractor(BaseExtractor):
         return custom_labels_dict
 
     async def get_num_of_pages(self, session):
-        # TODO: Add support for private repository
+        """
+        TODO: Possibly removed in the future including beautifulsoup dependencies as the function is currently not used.
+        Alternative method to retrieve the number of pages based on the response retrieved from GitHub API
+        Benefit: It does not use API calls hence, would not be counted in the GitHub API rate limit.
+        Note: However, it currently only works for public repository.
+        :param session: The session object
+        :return: Returns the number of pages based on the response retrieved from GitHub API
+        """
         non_api_link_to_labels = f'{self.link}/labels'
         async with session.get(non_api_link_to_labels, headers={"Accept": "text/html"}) as response:
             html = await response.text()
@@ -72,6 +80,13 @@ class GitHubExtractor(BaseExtractor):
         :return: Returns a dictionary of labels with customised properties.
         """
         async with session.get(self.labels_api_link, params=request_params) as response:
+            # Optimisation: If it is the first page, besides retrieving the json response,
+            # the total number of pages is also retrieved in a single API call. This is to reduce unnecessary API calls.
+            if request_params['page'] == 1:
+                query_string = urlparse(str(response.links.get('last').get('url'))).query if \
+                    response.links.get('last') else None
+                self.total_num_pages_labels = \
+                    int(parse_qs(query_string)['page'][0]) if query_string else 1
             logger.debug(f'get_labels method page request information {response.request_info}')
             current_labels = await response.json()
             logger.debug(f'labels list json from GitHub API: {json.dumps(current_labels)}')
@@ -80,19 +95,35 @@ class GitHubExtractor(BaseExtractor):
     async def request_labels(self):
         api_headers = {'Accept': self.accept_header}
         async with aiohttp.ClientSession(headers=api_headers, auth=self.authentication) as session:
-            num_of_pages = await self.get_num_of_pages(session)
             tasks = []
-            for current_page_num in range(1, num_of_pages + 1):
-                params = {'per_page': self.per_page, 'page': current_page_num}
-                tasks.append(asyncio.ensure_future(self.get_labels_dict(session, params)))
-            custom_json_list_labels = await asyncio.gather(*tasks)
-            logger.debug(custom_json_list_labels)
-
-            # To convert to the list to a dictionary (custom format json compatible with this command line interface)
             custom_labels_dict_json = dict()
-            for current_dict in custom_json_list_labels:
-                logger.debug(current_dict)
-                custom_labels_dict_json.update(current_dict)
+
+            is_first = True
+            num_of_pages = 1
+            current_page_num = 1
+            while current_page_num <= num_of_pages:
+                params = {'per_page': self.per_page, 'page': current_page_num}
+
+                if is_first:
+                    response = await self.get_labels_dict(session, params)
+                    custom_labels_dict_json.update(response)
+                    logger.debug(custom_labels_dict_json)
+                    num_of_pages = self.total_num_pages_labels
+                    is_first = False
+                else:
+                    tasks.append(asyncio.ensure_future(self.get_labels_dict(session, params)))
+
+                current_page_num += 1
+
+            if tasks:
+                custom_json_list_labels = await asyncio.gather(*tasks)
+                logger.debug(custom_json_list_labels)
+
+                # To convert the list to a dictionary (custom format json compatible with
+                # this command line interface)
+                for current_dict in custom_json_list_labels:
+                    logger.debug(current_dict)
+                    custom_labels_dict_json.update(current_dict)
 
             logger.debug(custom_labels_dict_json)
             return custom_labels_dict_json

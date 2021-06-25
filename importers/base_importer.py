@@ -10,7 +10,6 @@ class BaseImporter(ABC):
     def __init__(self, link, src_json_file_path: Path = None):
         self.link = link
         self.src_json_file_path = src_json_file_path
-        self.labels = set()
         self.repo_owner = None
         self.repo_name = None
 
