@@ -91,11 +91,11 @@ def main():
                 file_path = MAIN_EXPORT_DIRECTORY.joinpath(
                     f"{repo_owner}_{repo_name}_{re.sub(r'[-.: ]', '_', str(datetime.now()))}.json")
 
-            custom_json_list_labels = current_extractor.execute()
+            custom_labels_dict_json = current_extractor.execute()
             file_path.parent.mkdir(parents=True, exist_ok=True)
             # To export the json file and prettify it.
             with open(file_path, mode='w') as json_file:
-                json.dump(custom_json_list_labels, json_file, indent=4)
+                json.dump(custom_labels_dict_json, json_file, indent=4)
             logger.info(f'Labels from {args.export_cmd_repo_link} exported to {file_path}')
 
     # The logic for "import" subcommand with source json file path
