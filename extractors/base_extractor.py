@@ -8,7 +8,8 @@ class BaseExtractor(ABC):
 
     def __init__(self, link):
         self.link = link
-        self.labels = set()
+        self.repo_owner = None
+        self.repo_name = None
 
     @abstractmethod
     def request_labels(self):

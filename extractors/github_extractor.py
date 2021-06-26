@@ -9,10 +9,11 @@ import aiohttp
 import asyncio
 import logging
 
+from aiohttp import BasicAuth
 from bs4 import BeautifulSoup
 from extractors.base_extractor import BaseExtractor
-from urllib.parse import urlparse
-from itertools import chain
+from utilities.config import GITHUB_USERNAME, GITHUB_PERSONAL_ACCESS_TOKEN
+from urllib.parse import urlparse, parse_qs
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +27,10 @@ class GitHubExtractor(BaseExtractor):
         # Max number of pages allowed by GitHub API for list of labels in repository is 100
         # https://docs.github.com/en/rest/reference/issues#list-labels-for-a-repository
         self.per_page = 100
+        self.total_num_pages_labels = None
         self.repo_owner, self.repo_name = self.parse_github_link(link)
         self.labels_api_link = f'{self.main_api_link}/repos/{self.repo_owner}/{self.repo_name}/labels'
-        self.labels_encountered = set()
+        self.authentication = BasicAuth(GITHUB_USERNAME, password=GITHUB_PERSONAL_ACCESS_TOKEN)
 
     @staticmethod
     def parse_github_link(link):
@@ -37,21 +39,29 @@ class GitHubExtractor(BaseExtractor):
         repo_name = parsed_url_path[2]
         return repo_owner, repo_name
 
-    def gen_custom_labels_list(self, list_of_label_dict):
-        custom_labels_list = []
+    @staticmethod
+    def gen_custom_labels_dict(list_of_label_dict):
+        custom_labels_dict = dict()
         for current_label_dict in list_of_label_dict:
-            constructed_dict = {
+            current_label_name = current_label_dict['name'].lower()
+            custom_labels_dict[current_label_name] = {
                 **current_label_dict
             }
-            del constructed_dict['id']
-            del constructed_dict['node_id']
-            del constructed_dict['url']
-            del constructed_dict['default']
-            self.labels_encountered.add(constructed_dict['name'])
-            custom_labels_list.append(constructed_dict)
-        return custom_labels_list
+            del custom_labels_dict[current_label_name]['id']
+            del custom_labels_dict[current_label_name]['node_id']
+            del custom_labels_dict[current_label_name]['url']
+            del custom_labels_dict[current_label_name]['default']
+        return custom_labels_dict
 
     async def get_num_of_pages(self, session):
+        """
+        TODO: Possibly removed in the future including beautifulsoup dependencies as the function is currently not used.
+        Alternative method to retrieve the number of pages based on the response retrieved from GitHub API
+        Benefit: It does not use API calls hence, would not be counted in the GitHub API rate limit.
+        Note: However, it currently only works for public repository.
+        :param session: The session object
+        :return: Returns the number of pages based on the response retrieved from GitHub API
+        """
         non_api_link_to_labels = f'{self.link}/labels'
         async with session.get(non_api_link_to_labels, headers={"Accept": "text/html"}) as response:
             html = await response.text()
@@ -61,39 +71,69 @@ class GitHubExtractor(BaseExtractor):
             logger.debug(f'{self.link} has {num_of_pages} pages.')
             return num_of_pages
 
-    async def get_labels_list(self, session, request_params):
+    async def get_labels_dict(self, session, request_params):
         """
-        Returns the list of labels with customised properties based on the list of labels retrieved from the GitHub API
+        Returns a dictionary of labels with customised properties based on the list of labels retrieved from the
+        GitHub API
         :param session: The session object
         :param request_params: The request_params which should contain the per_page and page params
-        :return: The list of labels with customised properties.
+        :return: Returns a dictionary of labels with customised properties.
         """
         async with session.get(self.labels_api_link, params=request_params) as response:
+            # Optimisation: If it is the first page, besides retrieving the json response,
+            # the total number of pages is also retrieved in a single API call. This is to reduce unnecessary API calls.
+            if request_params['page'] == 1:
+                query_string = urlparse(str(response.links.get('last').get('url'))).query if \
+                    response.links.get('last') else None
+                self.total_num_pages_labels = \
+                    int(parse_qs(query_string)['page'][0]) if query_string else 1
             logger.debug(f'get_labels method page request information {response.request_info}')
             current_labels = await response.json()
-            logger.debug(f'labels list json {json.dumps(current_labels)}')
-            return self.gen_custom_labels_list(current_labels)
+            logger.debug(f'labels list json from GitHub API: {json.dumps(current_labels)}')
+            return self.gen_custom_labels_dict(current_labels)
 
     async def request_labels(self):
         api_headers = {'Accept': self.accept_header}
-        async with aiohttp.ClientSession(headers=api_headers) as session:
-            num_of_pages = await self.get_num_of_pages(session)
+        async with aiohttp.ClientSession(headers=api_headers, auth=self.authentication) as session:
             tasks = []
-            for current_page_num in range(1, num_of_pages + 1):
-                params = {'per_page': self.per_page, 'page': current_page_num}
-                tasks.append(asyncio.ensure_future(self.get_labels_list(session, params)))
+            custom_labels_dict_json = dict()
 
-            custom_json_list_labels = await asyncio.gather(*tasks)
-            # To flatten the lists
-            custom_json_list_labels = list(chain.from_iterable(custom_json_list_labels))
-            logger.debug(custom_json_list_labels)
-            return custom_json_list_labels
+            is_first = True
+            num_of_pages = 1
+            current_page_num = 1
+            while current_page_num <= num_of_pages:
+                params = {'per_page': self.per_page, 'page': current_page_num}
+
+                if is_first:
+                    response = await self.get_labels_dict(session, params)
+                    custom_labels_dict_json.update(response)
+                    logger.debug(custom_labels_dict_json)
+                    num_of_pages = self.total_num_pages_labels
+                    is_first = False
+                else:
+                    tasks.append(asyncio.ensure_future(self.get_labels_dict(session, params)))
+
+                current_page_num += 1
+
+            if tasks:
+                custom_json_list_labels = await asyncio.gather(*tasks)
+                logger.debug(custom_json_list_labels)
+
+                # To convert the list to a dictionary (custom format json compatible with
+                # this command line interface)
+                for current_dict in custom_json_list_labels:
+                    logger.debug(current_dict)
+                    custom_labels_dict_json.update(current_dict)
+
+            logger.debug(custom_labels_dict_json)
+            return custom_labels_dict_json
 
     def execute(self):
         """
         This is the main function which will be executed to run the GitHub extractor.
-        It returns the list of labels with customised properties compatible with this command line interface.
-        :return: It returns the list of labels with customised properties compatible with this command line interface
+        It returns a dictionary of labels with customised properties compatible with this command line interface.
+        :return: It returns a dictionary of labels with customised properties compatible
+        with this command line interface
         """
 
         # Workaround for known issue involving event loop for Windows environment:
@@ -102,9 +142,9 @@ class GitHubExtractor(BaseExtractor):
         # https://bugs.python.org/issue39232 (Known issue in Python)
         if os.name == "nt":
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-        custom_json_list_labels = asyncio.run(self.request_labels())
+        custom_labels_dict_json = asyncio.run(self.request_labels())
+        logger.debug(custom_labels_dict_json)
+        logger.debug(json.dumps(custom_labels_dict_json))
+        logger.debug(len(custom_labels_dict_json.keys()))
 
-        logger.debug(json.dumps(custom_json_list_labels))
-        logger.debug(len(custom_json_list_labels))
-
-        return custom_json_list_labels
+        return custom_labels_dict_json
