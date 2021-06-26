@@ -4,7 +4,6 @@ GitHub: https://github.com/
 """
 
 import asyncio
-import json
 import logging
 import os
 import aiohttp
@@ -13,21 +12,19 @@ from aiohttp import BasicAuth
 from extractors.github_extractor import GitHubExtractor
 from importers.base_importer import BaseImporter
 from utilities.config import GITHUB_USERNAME, GITHUB_PERSONAL_ACCESS_TOKEN
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 
 class GitHubImporter(BaseImporter):
 
-    def __init__(self, link, src_json_file_path: Path = None):
-        super().__init__(link, src_json_file_path)
+    def __init__(self, link, loaded_json_data):
+        super().__init__(link, loaded_json_data)
         self.main_api_link = 'https://api.github.com'
         self.accept_header = 'application/vnd.github.v3+json'
         self.repo_owner, self.repo_name = GitHubExtractor.parse_github_link(link)
         self.labels_api_link = f'{self.main_api_link}/repos/{self.repo_owner}/{self.repo_name}/labels'
         self.existing_labels_json = None
-        self.json_data = None
         self.labels_encountered = set()
         self.authentication = BasicAuth(GITHUB_USERNAME, password=GITHUB_PERSONAL_ACCESS_TOKEN)
 
@@ -68,37 +65,34 @@ class GitHubImporter(BaseImporter):
                         }
                         new_properties['new_name'] = new_properties['name']
                         del new_properties['name']
-                        await self.update_label(session, self.existing_labels_json[current_label_name]['name'],
-                                                new_properties)
+                        tasks.append(asyncio.ensure_future(
+                            self.update_label(session, self.existing_labels_json[current_label_name]['name'],
+                                              new_properties)))
                 else:
-                    await self.create_label(session, self.json_data[current_label_name])
+                    tasks.append(asyncio.ensure_future(self.create_label(session, self.json_data[current_label_name])))
 
             labels_not_in_json = set(self.existing_labels_json.keys()).difference(self.labels_encountered)
             for current_label_name in labels_not_in_json:
-                await self.delete_label(session, self.existing_labels_json[current_label_name]['name'])
+                tasks.append(asyncio.ensure_future(
+                    self.delete_label(session, self.existing_labels_json[current_label_name]['name'])))
+
+            if tasks:
+                await asyncio.gather(*tasks)
 
     def execute(self):
         """
         This is the main function which will be executed to run the GitHub importer.
         :return: It returns True if import is successful and false if it is not successful.
         """
-        if self.src_json_file_path:
-            # Import the labels from a source json file path
-            with open(self.src_json_file_path, mode='r') as json_file:
-                self.json_data = json.load(json_file)
-                logger.debug("The data read from json file:", self.json_data)
 
-                extractor = GitHubExtractor(self.link)
-                self.existing_labels_json = extractor.execute()
-                logger.debug(self.existing_labels_json)
+        extractor = GitHubExtractor(self.link)
+        self.existing_labels_json = extractor.execute()
+        logger.debug(self.existing_labels_json)
 
-                # Workaround for known issue involving event loop for Windows environment:
-                # Resources:
-                # https://github.com/aio-libs/aiohttp/issues/4536#issuecomment-698441077
-                # https://bugs.python.org/issue39232 (Known issue in Python)
-                if os.name == "nt":
-                    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-                asyncio.run(self.import_labels())
-        else:
-            # TODO: Import the labels from a source repository url
-            raise NotImplementedError
+        # Workaround for known issue involving event loop for Windows environment:
+        # Resources:
+        # https://github.com/aio-libs/aiohttp/issues/4536#issuecomment-698441077
+        # https://bugs.python.org/issue39232 (Known issue in Python)
+        if os.name == "nt":
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        asyncio.run(self.import_labels())
