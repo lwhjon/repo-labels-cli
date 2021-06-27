@@ -1,7 +1,7 @@
 # RepoLabels command line interface
 
-<a target="_blank" href="https://www.python.org/downloads/" title="Python Version Requirement"><img src="https://img.shields.io/badge/Python-%3E=_3.9.5-blue.svg"></a>
-<a target="_blank" href="[LICENSE](https://github.com/lwhjon/repo-labels-cli/blob/master/LICENSE)" title="MIT License"><img src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
+[![Python Version Requirement](https://img.shields.io/badge/Python-%3E=_3.9.5-blue)](https://www.python.org/downloads/)
+[![MIT License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/lwhjon/repo-labels-cli/blob/master/LICENSE)
 
 ## Introduction
 
