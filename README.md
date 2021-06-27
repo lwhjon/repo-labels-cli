@@ -1,8 +1,13 @@
-# Introduction
+# RepoLabels command line interface
+
+<a target="_blank" href="https://www.python.org/downloads/" title="Python Version Requirement"><img src="https://img.shields.io/badge/Python-%3E=_3.9.5-blue.svg"></a>
+<a target="_blank" href="[LICENSE](https://github.com/lwhjon/repo-labels-cli/blob/master/LICENSE)" title="MIT License"><img src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
+
+## Introduction
 
 **RepoLabels** is a GitHub Repository Labels command line interface which allows for easy exporting and importing of GitHub Labels.
 
-# Purpose
+## Purpose
 
 The purpose of this project includes:
 
@@ -10,22 +15,22 @@ The purpose of this project includes:
 - Serving as a practice for me to learn Python
 - The usage of public APIs such as [GitHub API](https://docs.github.com/en/rest)
 
-# What are the use cases of RepoLabels?
+## What are the use cases of RepoLabels?
 
 You can use **RepoLabels** to:
 
 - Backup your GitHub labels.
 - Import your GitHub labels to a different GitHub Repository.
 
-## Benefits
+### Benefits
 
 - This avoids users having to manually reconfigure their labels when creating a new GitHub Repository or when planning to synchronise the labels of an existing repository which helps to save development time.
 
-# Getting Started
+## Getting Started
 
 A brief description on how to get your copy of **RepoLabels** running.
 
-## Requirements
+### Requirements
 
 We recommend using Python `3.9.5` (or later)
 
@@ -33,7 +38,7 @@ We recommend using Python `3.9.5` (or later)
 
 Please refer to the [`requirements.txt`](https://github.com/lwhjon/repo-labels-cli/blob/master/requirements.txt) for the updated Python packages dependencies.
 
-## Installation
+### Installation
 
 1. Clone the **RepoLabels**'s GitHub Repository.
 2. Create a `.env` file in the project root directory with the structure as shown below.
