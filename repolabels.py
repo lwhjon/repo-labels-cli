@@ -38,6 +38,14 @@ def main():
 
     subparsers = parser.add_subparsers(description="A list of possible subcommands")
 
+    # Parser for "sync" subcommand
+    parser_sync = subparsers.add_parser('sync',
+                                        help="Syncs labels from the source repository to the destination repository.")
+    parser_sync.add_argument('sync_src_repo_link',
+                             help="Link to the repository which the labels will be exported from.")
+    parser_sync.add_argument('sync_dest_repo_link',
+                             help="Link to the repository which the labels are to be imported to.")
+
     # Parser for "export" subcommand
     parser_export = subparsers.add_parser('export',
                                           help="Exports labels from the repository in a compatible format "
@@ -75,6 +83,22 @@ def main():
     if len(sys.argv) == 1:
         parser.print_help()
 
+    # The logic for "sync" subcommand
+    if hasattr(args, 'sync_src_repo_link') and hasattr(args, 'sync_dest_repo_link'):
+        current_src_repo_url = format_url(args.sync_src_repo_link)
+        current_dest_repo_url = format_url(args.sync_dest_repo_link)
+
+        current_extractor = run_extractor(current_src_repo_url)
+
+        if current_extractor:
+            custom_labels_dict_json = current_extractor.execute()
+            current_importer = run_importer(current_dest_repo_url, custom_labels_dict_json)
+            if current_importer and custom_labels_dict_json:
+                current_importer.execute()
+                logger.info(
+                    f'Labels in {args.sync_dest_repo_link} have been successfully synchronised '
+                    f'with {args.sync_src_repo_link}')
+
     # The logic for "export" subcommand
     if hasattr(args, 'export_cmd_repo_link'):
         current_export_url = format_url(args.export_cmd_repo_link)
@@ -96,18 +120,26 @@ def main():
             # To export the json file and prettify it.
             with open(file_path, mode='w') as json_file:
                 json.dump(custom_labels_dict_json, json_file, indent=4)
-            logger.info(f'Labels from {args.export_cmd_repo_link} exported to {file_path}')
+            logger.info(f'Labels from {args.export_cmd_repo_link} have been successfully exported to {file_path}')
 
     # The logic for "import" subcommand with source json file path
     if hasattr(args, 'import_cmd_repo_link') and hasattr(args, 'src_json_file_path'):
-        current_import_url = format_url(args.import_cmd_repo_link)
 
-        current_importer = run_importer(current_import_url, src_json_file_path=args.src_json_file_path)
+        # Load the labels from the source json file path
+        with open(args.src_json_file_path, mode='r') as json_file:
+            loaded_json_data = json.load(json_file)
+            logger.debug("The data read from json file:", loaded_json_data)
 
-        if current_importer:
-            current_importer.execute()
-            logger.info(
-                f'Labels from {args.src_json_file_path} has been successfully imported to {args.import_cmd_repo_link}')
+            if loaded_json_data:
+                current_import_url = format_url(args.import_cmd_repo_link)
+
+                current_importer = run_importer(current_import_url, loaded_json_data)
+
+                if current_importer:
+                    current_importer.execute()
+                    logger.info(
+                        f'Labels from {args.src_json_file_path} have been successfully imported '
+                        f'to {args.import_cmd_repo_link}')
 
     logger.info("Script execution completed")
 

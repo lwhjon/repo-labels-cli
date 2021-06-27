@@ -4,7 +4,6 @@ based on the parameter passed.
 """
 
 import logging
-from pathlib import Path
 
 from urllib.parse import urlparse
 from exceptions.general_exceptions import SiteNotSupported
@@ -16,14 +15,14 @@ logger = logging.getLogger(__name__)
 class ImporterFacade:
 
     @staticmethod
-    def execute(repo_link: str, src_json_file_path: Path = None):
+    def execute(repo_link: str, loaded_json_data):
         try:
             current_repo_link = repo_link
             parsed_url = urlparse(current_repo_link)
             hostname = parsed_url.hostname
 
             if hostname and hostname in ['www.github.com', 'github.com']:
-                return GitHubImporter(current_repo_link, src_json_file_path)
+                return GitHubImporter(current_repo_link, loaded_json_data)
             else:
                 raise SiteNotSupported(hostname)
         except SiteNotSupported as error:
