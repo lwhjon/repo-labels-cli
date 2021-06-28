@@ -24,7 +24,7 @@ class GitHubExtractor(BaseExtractor):
         super().__init__(link)
         self.main_api_link = 'https://api.github.com'
         self.accept_header = 'application/vnd.github.v3+json'
-        # Max number of pages allowed by GitHub API for list of labels in repository is 100
+        # Max number of labels per page allowed by GitHub API for retrieval of the list of labels in repository is 100
         # https://docs.github.com/en/rest/reference/issues#list-labels-for-a-repository
         self.per_page = 100
         self.total_num_pages_labels = None
