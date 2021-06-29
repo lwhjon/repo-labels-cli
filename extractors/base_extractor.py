@@ -12,6 +12,10 @@ class BaseExtractor(ABC):
         self.repo_name = None
 
     @abstractmethod
+    def get_rate_limit(self):
+        raise NotImplementedError
+
+    @abstractmethod
     def request_labels(self):
         raise NotImplementedError
 
