@@ -63,10 +63,10 @@ def main():
     parser_import = subparsers.add_parser('import',
                                           help="Import labels from a compatible json file constructed from "
                                                "the 'export' subcommand to the repository.")
-    parser_import.add_argument('import_cmd_repo_link',
-                               help="Link to the repository in which the labels are to be imported to.")
     parser_import.add_argument('src_json_file_path', type=Path,
                                help="The source json file path in which the labels will be imported from.")
+    parser_import.add_argument('import_cmd_repo_link',
+                               help="Link to the repository in which the labels are to be imported to.")
 
     # Parser for "website" subcommand
     parser_website = subparsers.add_parser('website', help=f'Redirects to the {SOFTWARE_NAME} project website')

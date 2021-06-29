@@ -95,7 +95,7 @@ GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
      - In the example below, we attempt to `import` the labels from the `json` file we obtained from the `export` subcommand example above to a sample repository:
 
        ```Shell
-       python import https://github.com/JonathanLeeWH/Sample exported/github_docs_2021_06_27_19_20_50_283179.json
+       python import exported/github_docs_2021_06_27_19_20_50_283179.json https://github.com/JonathanLeeWH/Sample
        ```
 
 _If you want to deactivate your current virtual environment, type `deactivate` in your command line or terminal._
