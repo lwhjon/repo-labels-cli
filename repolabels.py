@@ -9,7 +9,7 @@ import sys
 import logging
 
 from pathlib import Path
-from utilities.cli_utils import open_link, run_extractor, format_url, run_importer
+from utilities.cli_utils import open_link, run_extractor, format_url, run_importer, rate_limits
 from datetime import datetime
 
 SOFTWARE_NAME = "Repository Labels command line interface"
@@ -67,6 +67,11 @@ def main():
                                help="The source json file path in which the labels will be imported from.")
     parser_import.add_argument('import_cmd_repo_link',
                                help="Link to the repository in which the labels are to be imported to.")
+
+    # Parser for "ratelimit" subcommand
+    parser_rate_limit = subparsers.add_parser('ratelimit',
+                                              help="Retrieves the rate limit information for each services")
+    parser_rate_limit.set_defaults(rate_limit_func=rate_limits)
 
     # Parser for "website" subcommand
     parser_website = subparsers.add_parser('website', help=f'Redirects to the {SOFTWARE_NAME} project website')
@@ -140,6 +145,10 @@ def main():
                     logger.info(
                         f'Labels from {args.src_json_file_path} have been successfully imported '
                         f'to {args.import_cmd_repo_link}')
+
+    # The logic for "ratelimit" subcommand
+    if hasattr(args, 'rate_limit_func'):
+        args.rate_limit_func()
 
     logger.info("Script execution completed")
 

@@ -2,11 +2,19 @@
 This module contains the command line interface (cli) utility methods
 """
 
+import asyncio
+import logging
+import os
 import webbrowser
+
 from pathlib import Path
 from urllib.parse import urlparse
 from utilities.extractor_facade import ExtractorFacade
 from utilities.importer_facade import ImporterFacade
+
+DEFAULT_SERVICES = ['https://github.com']
+
+logger = logging.getLogger(__name__)
 
 
 def open_link(args):
@@ -52,3 +60,34 @@ def run_extractor(export_repo_link):
 def run_importer(import_repo_link, src_json_file_path: Path = None):
     response = ImporterFacade().execute(import_repo_link, src_json_file_path)
     return response
+
+
+async def request_rate_limits(services):
+    tasks = []
+    for service in services:
+        service_object = ExtractorFacade().execute(service)
+        tasks.append(asyncio.ensure_future(service_object.get_rate_limit()))
+
+    rate_limit_results = await asyncio.gather(*tasks)
+    return rate_limit_results
+
+
+def rate_limits(services=DEFAULT_SERVICES):
+    # Workaround for known issue involving event loop for Windows environment:
+    # Resources:
+    # https://github.com/aio-libs/aiohttp/issues/4536#issuecomment-698441077
+    # https://bugs.python.org/issue39232 (Known issue in Python)
+    if os.name == "nt":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    results = asyncio.run(request_rate_limits(services))
+
+    for current_result in results:
+        service_name, total_rate_limit, rate_limit_remaining, rate_limit_used, rate_limit_reset_time = current_result
+        header = f'{service_name} Rate Limits Information'
+        response = f"\n\n{header}\n" \
+                   f"{'=' * len(header)}\n" \
+                   f"Total Rate Limit: {total_rate_limit}\n" \
+                   f"Total Rate Limit Remaining: {rate_limit_remaining}\n" \
+                   f"Total Rate Limit used: {rate_limit_used}\n" \
+                   f"{service_name} API Rate Limit resets at {rate_limit_reset_time}\n"
+        logger.info(f'Rate Limits Information: {response}')

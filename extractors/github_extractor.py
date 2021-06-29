@@ -5,12 +5,14 @@ GitHub: https://github.com/
 
 import json
 import os
+
 import aiohttp
 import asyncio
 import logging
 
 from aiohttp import BasicAuth
 from bs4 import BeautifulSoup
+from datetime import datetime
 from extractors.base_extractor import BaseExtractor
 from utilities.config import GITHUB_USERNAME, GITHUB_PERSONAL_ACCESS_TOKEN
 from urllib.parse import urlparse, parse_qs
@@ -35,9 +37,11 @@ class GitHubExtractor(BaseExtractor):
     @staticmethod
     def parse_github_link(link):
         parsed_url_path = urlparse(link).path.split('/')
-        repo_owner = parsed_url_path[1]
-        repo_name = parsed_url_path[2]
-        return repo_owner, repo_name
+        if len(parsed_url_path) >= 3:
+            repo_owner = parsed_url_path[1]
+            repo_name = parsed_url_path[2]
+            return repo_owner, repo_name
+        return None, None
 
     @staticmethod
     def gen_custom_labels_dict(list_of_label_dict):
@@ -52,6 +56,23 @@ class GitHubExtractor(BaseExtractor):
             del custom_labels_dict[current_label_name]['url']
             del custom_labels_dict[current_label_name]['default']
         return custom_labels_dict
+
+    async def get_rate_limit(self):
+        """
+        Returns Service name, the total rate limit, remaining rate limit, rate limit used and time which rate limit will reset.
+        Note: This function returns the rate limit for GitHub API Resources core component
+        as the GitHub API requests used by RepoLabels are in the core component GitHub API Resources.
+        :return: Returns the total rate limit, remaining rate limit, rate limit used and time
+        which rate limit will reset.
+        """
+        api_headers = {'Accept': self.accept_header}
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f'{self.main_api_link}/rate_limit', params=api_headers,
+                                   auth=self.authentication) as response:
+                result = await response.json()
+                result = result['resources']['core']
+                return "GitHub API", result['limit'], result['remaining'], result['used'], \
+                       datetime.fromtimestamp(result['reset'])
 
     async def get_num_of_pages(self, session):
         """
