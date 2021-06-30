@@ -9,7 +9,7 @@ import sys
 import logging
 
 from pathlib import Path
-from utilities.cli_utils import open_link, run_extractor, format_url, run_importer, rate_limits
+from utilities.cli_utils import open_link, run_extractor, format_url, run_importer, rate_limits, validate_url
 from datetime import datetime
 
 SOFTWARE_NAME = "Repository Labels command line interface"
@@ -90,6 +90,8 @@ def main():
 
     # The logic for "sync" subcommand
     if hasattr(args, 'sync_src_repo_link') and hasattr(args, 'sync_dest_repo_link'):
+        validate_url(args.sync_src_repo_link)
+        validate_url(args.sync_dest_repo_link)
         current_src_repo_url = format_url(args.sync_src_repo_link)
         current_dest_repo_url = format_url(args.sync_dest_repo_link)
 
@@ -106,6 +108,8 @@ def main():
 
     # The logic for "export" subcommand
     if hasattr(args, 'export_cmd_repo_link'):
+        validate_url(args.export_cmd_repo_link)
+
         current_export_url = format_url(args.export_cmd_repo_link)
 
         current_extractor = run_extractor(current_export_url)
@@ -136,6 +140,7 @@ def main():
             logger.debug("The data read from json file:", loaded_json_data)
 
             if loaded_json_data:
+                validate_url(args.import_cmd_repo_link)
                 current_import_url = format_url(args.import_cmd_repo_link)
 
                 current_importer = run_importer(current_import_url, loaded_json_data)

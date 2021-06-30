@@ -8,7 +8,9 @@ import os
 import webbrowser
 
 from pathlib import Path
+from urllib.error import URLError
 from urllib.parse import urlparse
+from urllib.request import urlopen
 from utilities.extractor_facade import ExtractorFacade
 from utilities.importer_facade import ImporterFacade
 
@@ -91,3 +93,17 @@ def rate_limits(services=DEFAULT_SERVICES):
                    f"Total Rate Limit used: {rate_limit_used}\n" \
                    f"{service_name} API Rate Limit resets at {rate_limit_reset_time}\n"
         logger.info(f'Rate Limits Information: {response}')
+
+
+def validate_url(url):
+    """
+    To check if the internet connection is present and that the input url is valid else an error will be outputted
+    and the program exits with exit code 1.
+    :param url: The input url to be validated.
+    :return:
+    """
+    try:
+        urlopen(format_url(url), timeout=8)
+    except (URLError, ValueError):
+        logger.error(f'Please ensure that {url} is a valid url and that you are connected to the internet.')
+        raise SystemExit(1)
