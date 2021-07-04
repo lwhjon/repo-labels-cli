@@ -9,7 +9,7 @@ import sys
 import logging
 
 from pathlib import Path
-from utilities.cli_utils import open_link, run_extractor, format_url, run_importer
+from utilities.cli_utils import open_link, run_extractor, format_url, run_importer, rate_limits, validate_url
 from datetime import datetime
 
 SOFTWARE_NAME = "Repository Labels command line interface"
@@ -63,10 +63,15 @@ def main():
     parser_import = subparsers.add_parser('import',
                                           help="Import labels from a compatible json file constructed from "
                                                "the 'export' subcommand to the repository.")
-    parser_import.add_argument('import_cmd_repo_link',
-                               help="Link to the repository in which the labels are to be imported to.")
     parser_import.add_argument('src_json_file_path', type=Path,
                                help="The source json file path in which the labels will be imported from.")
+    parser_import.add_argument('import_cmd_repo_link',
+                               help="Link to the repository in which the labels are to be imported to.")
+
+    # Parser for "ratelimit" subcommand
+    parser_rate_limit = subparsers.add_parser('ratelimit',
+                                              help="Retrieves the rate limit information for each services")
+    parser_rate_limit.set_defaults(rate_limit_func=rate_limits)
 
     # Parser for "website" subcommand
     parser_website = subparsers.add_parser('website', help=f'Redirects to the {SOFTWARE_NAME} project website')
@@ -85,6 +90,8 @@ def main():
 
     # The logic for "sync" subcommand
     if hasattr(args, 'sync_src_repo_link') and hasattr(args, 'sync_dest_repo_link'):
+        validate_url(args.sync_src_repo_link)
+        validate_url(args.sync_dest_repo_link)
         current_src_repo_url = format_url(args.sync_src_repo_link)
         current_dest_repo_url = format_url(args.sync_dest_repo_link)
 
@@ -101,6 +108,8 @@ def main():
 
     # The logic for "export" subcommand
     if hasattr(args, 'export_cmd_repo_link'):
+        validate_url(args.export_cmd_repo_link)
+
         current_export_url = format_url(args.export_cmd_repo_link)
 
         current_extractor = run_extractor(current_export_url)
@@ -131,6 +140,7 @@ def main():
             logger.debug("The data read from json file:", loaded_json_data)
 
             if loaded_json_data:
+                validate_url(args.import_cmd_repo_link)
                 current_import_url = format_url(args.import_cmd_repo_link)
 
                 current_importer = run_importer(current_import_url, loaded_json_data)
@@ -140,6 +150,10 @@ def main():
                     logger.info(
                         f'Labels from {args.src_json_file_path} have been successfully imported '
                         f'to {args.import_cmd_repo_link}')
+
+    # The logic for "ratelimit" subcommand
+    if hasattr(args, 'rate_limit_func'):
+        args.rate_limit_func()
 
     logger.info("Script execution completed")
 
