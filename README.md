@@ -101,6 +101,11 @@ GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
        python import exported/github_docs_2021_06_27_19_20_50_283179.json https://github.com/JonathanLeeWH/Sample
        ```
 
+   - To check the current `ratelimit` for each services such as GitHub API ratelimit.
+      ```Shell
+       python ratelimit
+       ```
+
 _If you want to deactivate your current virtual environment, type `deactivate` in your command line or terminal._
 
 ## Technologies and Frameworks
