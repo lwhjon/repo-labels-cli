@@ -2,6 +2,9 @@
 
 [![Python Version Requirement](https://img.shields.io/badge/Python-%3E=_3.9.5-blue)](https://www.python.org/downloads/)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/lwhjon/repo-labels-cli/blob/master/LICENSE)
+[![Latest Stable Version)](https://img.shields.io/github/v/release/lwhjon/repo-labels-cli?color=blue&label=Latest%20Stable%20Version)](https://github.com/lwhjon/repo-labels-cli/releases)
+[![Latest Version including pre-releases)](https://img.shields.io/github/v/release/lwhjon/repo-labels-cli?color=blue&include_prereleases&label=Latest%20Version%20%28including%20pre%20releases%29)](https://github.com/lwhjon/repo-labels-cli/releases)
+
 
 ## Introduction
 
