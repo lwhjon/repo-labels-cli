@@ -3,6 +3,7 @@ This module contains the command line interface (cli) utility methods
 """
 
 import asyncio
+import aiohttp
 import logging
 import os
 import webbrowser
@@ -74,7 +75,10 @@ async def request_rate_limits(services):
     return rate_limit_results
 
 
-def rate_limits(services=DEFAULT_SERVICES):
+def rate_limits(services=None):
+    if services is None:
+        services = DEFAULT_SERVICES
+
     # Workaround for known issue involving event loop for Windows environment:
     # Resources:
     # https://github.com/aio-libs/aiohttp/issues/4536#issuecomment-698441077
@@ -107,3 +111,37 @@ def validate_url(url):
     except (URLError, ValueError):
         logger.error(f'Please ensure that {url} is a valid url and that you are connected to the internet.')
         raise SystemExit(1)
+
+
+async def request_latest_version(github_repo_url):
+    """
+    Returns the Latest Stable Release Version from RepoLabels GitHub Repository's {github_repo_url}/releases/latest
+    :param github_repo_url The RepoLabels GitHub Project Repository url
+    :return: Returns the Latest Stable Release Version from RepoLabels GitHub Repository
+    """
+    async with aiohttp.ClientSession() as session:
+        async with session.get(f'{github_repo_url}/releases/latest', allow_redirects=False) as response:
+            location_header = str(response.headers.get('Location'))
+            logger.debug(response.headers)
+
+            # Parse latest version from response
+            location_header = urlparse(location_header).path.split('/')
+            latest_version = location_header[len(location_header) - 1][1:]
+            return latest_version
+
+
+def check_updates(github_repo_url):
+    """
+    Returns the Latest Stable Release Version from RepoLabels GitHub Repository.
+    :param github_repo_url The RepoLabels GitHub Project Repository url
+    :return: Returns the Latest Stable Release Version from RepoLabels GitHub Repository.
+    """
+    # Workaround for known issue involving event loop for Windows environment:
+    # Resources:
+    # https://github.com/aio-libs/aiohttp/issues/4536#issuecomment-698441077
+    # https://bugs.python.org/issue39232 (Known issue in Python)
+    if os.name == "nt":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    latest_version = asyncio.run(request_latest_version(github_repo_url))
+    logger.debug(f'RepoLabels command line interface Latest Stable Version: {latest_version}')
+    return latest_version
