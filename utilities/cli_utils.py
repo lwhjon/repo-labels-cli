@@ -102,7 +102,7 @@ def validate_url(url):
     """
     To check if the input url is valid else an error will be outputted and the program exits with exit code 1.
     :param url: The input url to be validated.
-    :return: Returns true if the input url is a valid url else it will raise an error
+    :return: Returns True if the input url is a valid url else it will raise an error
     and the program exits with exit code 1.
     """
 
