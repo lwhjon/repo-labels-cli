@@ -9,7 +9,8 @@ import sys
 import logging
 
 from pathlib import Path
-from utilities.cli_utils import open_link, run_extractor, format_url, run_importer, rate_limits, validate_url
+from utilities.cli_utils import open_link, run_extractor, format_url, run_importer, rate_limits, validate_url, \
+    check_updates
 from datetime import datetime
 
 SOFTWARE_NAME = "Repository Labels command line interface"
@@ -68,10 +69,15 @@ def main():
     parser_import.add_argument('import_cmd_repo_link',
                                help="Link to the repository in which the labels are to be imported to.")
 
-    # Parser for "ratelimit" subcommand
-    parser_rate_limit = subparsers.add_parser('ratelimit',
-                                              help="Retrieves the rate limit information for each services")
+    # Parser for "rate-limit" subcommand
+    parser_rate_limit = subparsers.add_parser('rate-limit',
+                                              help="Retrieves the rate limit information for each services.")
     parser_rate_limit.set_defaults(rate_limit_func=rate_limits)
+
+    # Parser for "update-cli" subcommand
+    parser_update_cli = subparsers.add_parser('update-cli',
+                                              help=f"Retrieves the latest stable version of {SOFTWARE_NAME}.")
+    parser_update_cli.set_defaults(update_cli_func=check_updates, url=f'{MAIN_PROJECT_REPO_LINK}/releases/latest')
 
     # Parser for "website" subcommand
     parser_website = subparsers.add_parser('website', help=f'Redirects to the {SOFTWARE_NAME} project website')
@@ -151,12 +157,33 @@ def main():
                         f'Labels from {args.src_json_file_path} have been successfully imported '
                         f'to {args.import_cmd_repo_link}')
 
-    # The logic for "ratelimit" subcommand
+    # The logic for "rate-limit" subcommand
     if hasattr(args, 'rate_limit_func'):
         args.rate_limit_func()
+
+    # The logic for "update-cli" subcommand
+    if hasattr(args, 'update_cli_func'):
+        latest_stable_version = args.update_cli_func(MAIN_PROJECT_REPO_LINK)
+        is_update_required = False
+        response = f"{SOFTWARE_NAME} Version Information:\n\nCurrent Version: {VERSION}\n" \
+                   f"Latest Stable Version: {latest_stable_version}\n"
+        if latest_stable_version != VERSION:
+            is_update_required = True
+
+        if is_update_required:
+            response = f'{response}A new stable version of {SOFTWARE_NAME} Version {VERSION} is available. ' \
+                       f'Redirecting to download page.\n'
+            open_link(args)
+        else:
+            response = f'{response}You have the latest version of {SOFTWARE_NAME}.\n'
+        logger.info(response)
 
     logger.info("Script execution completed")
 
 
 if __name__ == "__main__":
+    latest_version = check_updates(MAIN_PROJECT_REPO_LINK)
+    if latest_version != VERSION:
+        logger.info(f'A new stable version of {SOFTWARE_NAME} Version {VERSION} is available.')
+        logger.info("You can use the \'update-cli\' subcommand to retrieve the latest stable version. Thank you.")
     main()

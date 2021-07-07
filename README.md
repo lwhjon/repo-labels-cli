@@ -2,9 +2,8 @@
 
 [![Python Version Requirement](https://img.shields.io/badge/Python-%3E=_3.9.5-blue)](https://www.python.org/downloads/)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/lwhjon/repo-labels-cli/blob/master/LICENSE)
-[![Latest Stable Version)](https://img.shields.io/github/v/release/lwhjon/repo-labels-cli?color=blue&label=Latest%20Stable%20Version)](https://github.com/lwhjon/repo-labels-cli/releases)
+[![Latest Stable Version)](https://img.shields.io/github/v/release/lwhjon/repo-labels-cli?color=blue&label=Latest%20Stable%20Version)](https://github.com/lwhjon/repo-labels-cli/releases/latest)
 [![Latest Version including pre-releases)](https://img.shields.io/github/v/release/lwhjon/repo-labels-cli?color=blue&include_prereleases&label=Latest%20Version%20%28including%20pre%20releases%29)](https://github.com/lwhjon/repo-labels-cli/releases)
-
 
 ## Introduction
 
@@ -71,7 +70,7 @@ GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
    - To view the list of available commands: `python repolabels.py --help`
 8. A sample list of subcommands:
 
-   - To `sync` labels from a GitHub Repository to another GitHub Repository
+   - The `sync` subcommand can be used to `sync` labels from a GitHub Repository to another GitHub Repository
 
      - In the example below, we attempt to sync the labels from [https://github.com/github/docs](https://github.com/github/docs)'s GitHub Repository to a sample GitHub Repository:
 
@@ -79,7 +78,7 @@ GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
        python repolabels.py sync https://github.com/github/docs https://github.com/JonathanLeeWH/Sample
        ```
 
-   - To `export` labels from a GitHub Repository to a `json` format compatible with **RepoLabels**
+   - The `export` subcommand can be used to `export` labels from a GitHub Repository to a `json` format compatible with **RepoLabels**
 
      - In the example below, we attempt to `export` the labels from [https://github.com/github/docs](https://github.com/github/docs)'s GitHub Repository:
 
@@ -93,7 +92,7 @@ GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
 
        You can **change the export destination file path** using the `-d` flag followed by your desired destination file path.
 
-   - To `import` labels from a `json` format compatible with **RepoLabels** to a sample GitHub Repository.
+   - The `import` subcommand can be used to `import` labels from a `json` format compatible with **RepoLabels** to a sample GitHub Repository.
 
      - In the example below, we attempt to `import` the labels from the `json` file we obtained from the `export` subcommand example above to a sample repository:
 
@@ -101,10 +100,17 @@ GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
        python import exported/github_docs_2021_06_27_19_20_50_283179.json https://github.com/JonathanLeeWH/Sample
        ```
 
-   - To check the current `ratelimit` for each services such as GitHub API ratelimit.
-      ```Shell
-       python ratelimit
-       ```
+   - The `rate-limit` subcommand can be used to check the current rate limits for each services such as GitHub API rate limits.
+
+     ```Shell
+      python rate-limit
+     ```
+
+   - The `update-cli` subcommand can be used to check the **Latest Stable Version** of **RepoLabels**.
+
+     ```Shell
+      python update-cli
+     ```
 
 _If you want to deactivate your current virtual environment, type `deactivate` in your command line or terminal._
 
