@@ -1,5 +1,6 @@
 # RepoLabels command line interface
 
+[![Application CI](https://github.com/lwhjon/repo-labels-cli/actions/workflows/app-test.yml/badge.svg)](https://github.com/lwhjon/repo-labels-cli/actions/workflows/app-test.yml)
 [![Python Version Requirement](https://img.shields.io/badge/Python-%3E=_3.9.5-blue)](https://www.python.org/downloads/)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/lwhjon/repo-labels-cli/blob/master/LICENSE)
 [![Latest Stable Version)](https://img.shields.io/github/v/release/lwhjon/repo-labels-cli?color=blue&label=Latest%20Stable%20Version)](https://github.com/lwhjon/repo-labels-cli/releases/latest)
