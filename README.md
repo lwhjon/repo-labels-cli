@@ -1,6 +1,7 @@
 # RepoLabels command line interface
 
 [![Application CI](https://github.com/lwhjon/repo-labels-cli/actions/workflows/app-test.yml/badge.svg)](https://github.com/lwhjon/repo-labels-cli/actions/workflows/app-test.yml)
+[![CodeQL](https://github.com/lwhjon/repo-labels-cli/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/lwhjon/repo-labels-cli/actions/workflows/codeql-analysis.yml)
 [![Python Version Requirement](https://img.shields.io/badge/Python-%3E=_3.9.5-blue)](https://www.python.org/downloads/)
 [![MIT License](https://img.shields.io/badge/License-MIT-blue)](https://github.com/lwhjon/repo-labels-cli/blob/master/LICENSE)
 [![Latest Stable Version)](https://img.shields.io/github/v/release/lwhjon/repo-labels-cli?color=blue&label=Latest%20Stable%20Version)](https://github.com/lwhjon/repo-labels-cli/releases/latest)
@@ -98,19 +99,19 @@ GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
      - In the example below, we attempt to `import` the labels from the `json` file we obtained from the `export` subcommand example above to a sample repository:
 
        ```Shell
-       python import exported/github_docs_2021_06_27_19_20_50_283179.json https://github.com/JonathanLeeWH/Sample
+       python repolabels.py import exported/github_docs_2021_06_27_19_20_50_283179.json https://github.com/JonathanLeeWH/Sample
        ```
 
    - The `rate-limit` subcommand can be used to check the current rate limits for each services such as GitHub API rate limits.
 
      ```Shell
-      python rate-limit
+      python repolabels.py rate-limit
      ```
 
    - The `update-cli` subcommand can be used to check the **Latest Stable Version** of **RepoLabels**.
 
      ```Shell
-      python update-cli
+      python repolabels.py update-cli
      ```
 
 _If you want to deactivate your current virtual environment, type `deactivate` in your command line or terminal._
