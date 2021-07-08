@@ -1,4 +1,4 @@
-# RepoLabels command line interface
+# 💻 RepoLabels command line interface
 
 [![Application CI](https://github.com/lwhjon/repo-labels-cli/actions/workflows/app-test.yml/badge.svg)](https://github.com/lwhjon/repo-labels-cli/actions/workflows/app-test.yml)
 [![CodeQL](https://github.com/lwhjon/repo-labels-cli/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/lwhjon/repo-labels-cli/actions/workflows/codeql-analysis.yml)
@@ -7,11 +7,11 @@
 [![Latest Stable Version)](https://img.shields.io/github/v/release/lwhjon/repo-labels-cli?color=blue&label=Latest%20Stable%20Version)](https://github.com/lwhjon/repo-labels-cli/releases/latest)
 [![Latest Version including pre-releases)](https://img.shields.io/github/v/release/lwhjon/repo-labels-cli?color=blue&include_prereleases&label=Latest%20Version%20%28including%20pre%20releases%29)](https://github.com/lwhjon/repo-labels-cli/releases)
 
-## Introduction
+## 🎉 Introduction
 
 **RepoLabels** is a GitHub Repository Labels command line interface which allows for easy exporting and importing of GitHub Labels.
 
-## Purpose
+## ✔ Purpose
 
 The purpose of this project includes:
 
@@ -19,22 +19,22 @@ The purpose of this project includes:
 - Serving as a practice for me to learn Python
 - The usage of public APIs such as [GitHub API](https://docs.github.com/en/rest)
 
-## What are the use cases of RepoLabels?
+## 💡 What are the use cases of RepoLabels?
 
 You can use **RepoLabels** to:
 
 - Backup your GitHub labels.
 - Import your GitHub labels to a different GitHub Repository.
 
-### Benefits
+### ✨ Benefits
 
 - This avoids users having to manually reconfigure their labels when creating a new GitHub Repository or when planning to synchronise the labels of an existing repository which helps to save development time.
 
-## Getting Started
+## 📌 Getting Started
 
 A brief description on how to get your copy of **RepoLabels** running.
 
-### Requirements
+### 🛠 Requirements
 
 We recommend using Python `3.9.5` (or later)
 
@@ -42,7 +42,7 @@ We recommend using Python `3.9.5` (or later)
 
 Please refer to the [`requirements.txt`](https://github.com/lwhjon/repo-labels-cli/blob/master/requirements.txt) for the updated Python packages dependencies.
 
-### Installation
+### 💾 Installation
 
 1. Clone the **RepoLabels**'s GitHub Repository.
 2. Create a `.env` file in the project root directory with the structure as shown below.
@@ -116,10 +116,14 @@ GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
 
 _If you want to deactivate your current virtual environment, type `deactivate` in your command line or terminal._
 
-## Technologies and Frameworks
+## 🧰 Technologies and Frameworks
 
 A list of the technologies and frameworks used in this project
 
-### APIs
+### 🔎 APIs
 
 - [GitHub API](https://docs.github.com/en/rest)
+
+### ⚙ Others
+
+- GitHub Actions for Continuous Integration (CI)
