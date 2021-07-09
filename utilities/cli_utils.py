@@ -7,13 +7,12 @@ import aiohttp
 import logging
 import os
 import webbrowser
+import validators
 
 from pathlib import Path
-from urllib.error import URLError
-from urllib.parse import urlparse
-from urllib.request import urlopen
 from utilities.extractor_facade import ExtractorFacade
 from utilities.importer_facade import ImporterFacade
+from urllib.parse import urlparse
 
 DEFAULT_SERVICES = ['https://github.com']
 
@@ -24,7 +23,7 @@ def open_link(args):
     webbrowser.open(args.url, new=2)
 
 
-def remove_trailing_slash_to_url(url):
+def remove_url_trailing_slash(url):
     """
     Returns the input url without any trailing / if it had a trailing slash. This is useful for repository url
     where https://github.com/lwhjon/repo-labels-cli/ and https://github.com/lwhjon/repo-labels-cli both are equivalent
@@ -44,7 +43,7 @@ def format_url(url):
     :return: Returns the formatted url
     """
 
-    current_url = remove_trailing_slash_to_url(url)
+    current_url = remove_url_trailing_slash(url)
     parsed_url = urlparse(current_url)
 
     # To consider the case where the url does not have a scheme such as github.com without https prepended
@@ -101,16 +100,17 @@ def rate_limits(services=None):
 
 def validate_url(url):
     """
-    To check if the internet connection is present and that the input url is valid else an error will be outputted
-    and the program exits with exit code 1.
+    To check if the input url is valid else an error will be outputted and the program exits with exit code 1.
     :param url: The input url to be validated.
-    :return:
+    :return: Returns True if the input url is a valid url else it will raise an error
+    and the program exits with exit code 1.
     """
-    try:
-        urlopen(format_url(url), timeout=8)
-    except (URLError, ValueError):
-        logger.error(f'Please ensure that {url} is a valid url and that you are connected to the internet.')
+
+    if not validators.url(format_url(url)):
+        logger.error(f'Please ensure that {url} is a valid url.')
         raise SystemExit(1)
+
+    return True
 
 
 async def request_latest_version(github_repo_url):

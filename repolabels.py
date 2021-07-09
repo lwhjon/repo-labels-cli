@@ -32,7 +32,7 @@ logging.basicConfig(level=logging.DEBUG if debug_mode else logging.INFO,
 logger = logging.getLogger(__name__)
 
 
-def main():
+def main():  # noqa: C901
     parser = argparse.ArgumentParser(
         description=f'{SOFTWARE_NAME} is a command line interface to manage GitHub Repository labels.')
     parser.add_argument('--version', action='version', version=f'{SOFTWARE_NAME} Version {VERSION}')
