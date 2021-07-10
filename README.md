@@ -13,7 +13,7 @@
 
 ### 🎬 RepoLabels Video demonstration
 
-https://user-images.githubusercontent.com/46712102/125151170-cc4eb480-e177-11eb-978e-f00fe22698a1.mp4
+https://user-images.githubusercontent.com/46712102/125151519-53505c80-e179-11eb-8c7a-5e2232c11114.mp4
 
 ## ✔ Purpose
 
