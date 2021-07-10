@@ -11,6 +11,10 @@
 
 **RepoLabels** is a GitHub Repository Labels command line interface which allows for easy exporting and importing of GitHub Labels.
 
+### 🎬 RepoLabels Video demonstration
+
+https://user-images.githubusercontent.com/46712102/125151170-cc4eb480-e177-11eb-978e-f00fe22698a1.mp4
+
 ## ✔ Purpose
 
 The purpose of this project includes:
