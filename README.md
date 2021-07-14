@@ -19,7 +19,7 @@ https://user-images.githubusercontent.com/46712102/125151519-53505c80-e179-11eb-
 
 The purpose of this project includes:
 
-- Creating a tool which helps automate synchronisation of GitHub Labels for my personal usage and [use cases](#-what-are-the-use-cases-of-repolabelss).
+- Creating a tool which helps automate synchronisation of GitHub Labels for my personal usage and [use cases](#-what-are-the-use-cases-of-repolabels).
 - Serving as a practice for me to learn Python
 - The usage of public APIs such as [GitHub API](https://docs.github.com/en/rest)
 
