@@ -3,6 +3,8 @@ This module contains the BaseImporter Abstract class which all other importers a
 """
 from abc import ABC, abstractmethod
 
+from utilities.constants import ImportModes
+
 
 class BaseImporter(ABC):
 
@@ -17,5 +19,5 @@ class BaseImporter(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def execute(self):
+    def execute(self, mode: ImportModes):
         raise NotImplementedError

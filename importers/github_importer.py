@@ -12,6 +12,7 @@ from aiohttp import BasicAuth
 from extractors.github_extractor import GitHubExtractor
 from importers.base_importer import BaseImporter
 from utilities.config import GITHUB_USERNAME, GITHUB_PERSONAL_ACCESS_TOKEN
+from utilities.constants import ImportModes
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +80,18 @@ class GitHubImporter(BaseImporter):
             if tasks:
                 await asyncio.gather(*tasks)
 
-    def execute(self):
+    async def delete_all_labels(self):
+        api_headers = {'Accept': self.accept_header}
+        async with aiohttp.ClientSession(headers=api_headers, auth=self.authentication) as session:
+            tasks = []
+            for current_label_name in self.json_data.keys():
+                tasks.append(asyncio.ensure_future(
+                    self.delete_label(session, self.existing_labels_json[current_label_name]['name'])))
+
+            if tasks:
+                await asyncio.gather(*tasks)
+
+    def execute(self, mode: ImportModes):
         """
         This is the main function which will be executed to run the GitHub importer.
         :return: It returns True if import is successful and false if it is not successful.
@@ -95,4 +107,10 @@ class GitHubImporter(BaseImporter):
         # https://bugs.python.org/issue39232 (Known issue in Python)
         if os.name == "nt":
             asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-        asyncio.run(self.import_labels())
+
+        if mode == ImportModes.IMPORT_LABELS:
+            asyncio.run(self.import_labels())
+        elif mode == ImportModes.DEL_ALL_LABELS:
+            asyncio.run(self.delete_all_labels())
+        else:
+            logger.error('Invalid Importer modes.')

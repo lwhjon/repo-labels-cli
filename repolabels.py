@@ -11,6 +11,7 @@ import logging
 from pathlib import Path
 from utilities.cli_utils import open_link, run_extractor, format_url, run_importer, rate_limits, validate_url, \
     check_updates
+from utilities.constants import ImportModes
 from datetime import datetime
 
 SOFTWARE_NAME = "Repository Labels command line interface"
@@ -69,6 +70,12 @@ def main():  # noqa: C901
     parser_import.add_argument('import_cmd_repo_link',
                                help="Link to the repository in which the labels are to be imported to.")
 
+    # Parser for "rm-all" subcommand
+    parser_rm_all = subparsers.add_parser('rm-all',
+                                          help="Remove all labels from the source repository.")
+    parser_rm_all.add_argument('rm_all_repo_link',
+                               help="Link to the repository which the labels will be deleted.")
+
     # Parser for "rate-limit" subcommand
     parser_rate_limit = subparsers.add_parser('rate-limit',
                                               help="Retrieves the rate limit information for each services.")
@@ -107,7 +114,7 @@ def main():  # noqa: C901
             custom_labels_dict_json = current_extractor.execute()
             current_importer = run_importer(current_dest_repo_url, custom_labels_dict_json)
             if current_importer and custom_labels_dict_json:
-                current_importer.execute()
+                current_importer.execute(mode=ImportModes.IMPORT_LABELS)
                 logger.info(
                     f'Labels in {args.sync_dest_repo_link} have been successfully synchronised '
                     f'with {args.sync_src_repo_link}')
@@ -152,10 +159,25 @@ def main():  # noqa: C901
                 current_importer = run_importer(current_import_url, loaded_json_data)
 
                 if current_importer:
-                    current_importer.execute()
+                    current_importer.execute(mode=ImportModes.IMPORT_LABELS)
                     logger.info(
                         f'Labels from {args.src_json_file_path} have been successfully imported '
                         f'to {args.import_cmd_repo_link}')
+
+    # The logic for "rm-all" subcommand
+    if hasattr(args, 'rm_all_repo_link'):
+        validate_url(args.rm_all_repo_link)
+        current_rm_all_repo_url = format_url(args.rm_all_repo_link)
+
+        current_extractor = run_extractor(current_rm_all_repo_url)
+
+        if current_extractor:
+            custom_labels_dict_json = current_extractor.execute()
+            current_importer = run_importer(current_rm_all_repo_url, custom_labels_dict_json)
+            if current_importer and custom_labels_dict_json:
+                current_importer.execute(mode=ImportModes.DEL_ALL_LABELS)
+                logger.info(
+                    f'Labels in {args.rm_all_repo_link} have been successfully deleted.')
 
     # The logic for "rate-limit" subcommand
     if hasattr(args, 'rate_limit_func'):

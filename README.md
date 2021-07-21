@@ -76,7 +76,7 @@ GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
    - To view the list of available commands: `python repolabels.py --help`
 8. A sample list of subcommands:
 
-   - The `sync` subcommand can be used to `sync` labels from a GitHub Repository to another GitHub Repository
+   - The `sync` subcommand can be used to `sync` labels from a GitHub Repository to another GitHub Repository.
 
      - In the example below, we attempt to sync the labels from [https://github.com/github/docs](https://github.com/github/docs)'s GitHub Repository to a sample GitHub Repository:
 
@@ -84,7 +84,7 @@ GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
        python repolabels.py sync https://github.com/github/docs https://github.com/JonathanLeeWH/Sample
        ```
 
-   - The `export` subcommand can be used to `export` labels from a GitHub Repository to a `json` format compatible with **RepoLabels**
+   - The `export` subcommand can be used to `export` labels from a GitHub Repository to a `json` format compatible with **RepoLabels**.
 
      - In the example below, we attempt to `export` the labels from [https://github.com/github/docs](https://github.com/github/docs)'s GitHub Repository:
 
@@ -104,6 +104,14 @@ GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
 
        ```Shell
        python repolabels.py import exported/github_docs_2021_06_27_19_20_50_283179.json https://github.com/JonathanLeeWH/Sample
+       ```
+
+   - The `rm-all` subcommand can be used to remove all the labels from a GitHub Repository.
+
+     - In the example below, we attempt to remove all the labels from a sample GitHub Repository:
+
+       ```Shell
+       python repolabels.py rm-all https://github.com/JonathanLeeWH/Sample
        ```
 
    - The `rate-limit` subcommand can be used to check the current rate limits for each services such as GitHub API rate limits.
