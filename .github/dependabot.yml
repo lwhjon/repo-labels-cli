@@ -1,9 +1,15 @@
 version: 2
 updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+
   # Enable version updates for pip
-  - package-ecosystem: "pip"
+  - package-ecosystem: 'pip'
     # Look for `requirements.txt` in the `root` directory
-    directory: "/"
+    directory: '/'
     # Check the pip registry for updates every day (weekdays)
     schedule:
-      interval: "daily"
+      interval: 'daily'
