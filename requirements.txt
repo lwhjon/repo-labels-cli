@@ -4,7 +4,7 @@ attrs==21.2.0
 beautifulsoup4==4.10.0
 chardet==4.0.0
 decorator==5.1.0
-idna==3.2
+idna==3.3
 multidict==5.2.0
 python-dotenv==0.19.1
 six==1.16.0
