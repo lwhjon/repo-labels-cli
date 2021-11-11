@@ -6,7 +6,7 @@ chardet==4.0.0
 decorator==5.1.0
 idna==3.3
 multidict==5.2.0
-python-dotenv==0.19.1
+python-dotenv==0.19.2
 six==1.16.0
 soupsieve==2.3
 typing-extensions==3.10.0.2
