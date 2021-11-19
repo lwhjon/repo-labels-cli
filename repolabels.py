@@ -15,7 +15,7 @@ from utilities.constants import ImportModes
 from datetime import datetime
 
 SOFTWARE_NAME = "Repository Labels command line interface"
-VERSION = '1.0.0'
+VERSION = '1.1.0'
 MAIN_PROJECT_REPO_LINK = "https://github.com/lwhjon/repo-labels-cli"
 MAIN_EXPORT_DIRECTORY = Path.cwd().joinpath('exported')
 # The default file name will be renamed to the format {repo_owner}_{repo_name}_{current date and time}.json
