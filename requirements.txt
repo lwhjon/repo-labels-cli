@@ -1,6 +1,6 @@
 aiohttp==3.8.1
 async-timeout==4.0.2
-attrs==21.2.0
+attrs==21.3.0
 beautifulsoup4==4.10.0
 chardet==4.0.0
 decorator==5.1.0
