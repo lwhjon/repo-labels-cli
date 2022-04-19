@@ -9,6 +9,6 @@ multidict==6.0.2
 python-dotenv==0.20.0
 six==1.16.0
 soupsieve==2.3.2.post1
-typing-extensions==4.1.1
+typing-extensions==4.2.0
 validators==0.18.2
 yarl==1.7.2
